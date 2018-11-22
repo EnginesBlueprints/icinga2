@@ -15,12 +15,48 @@
         "level": "alpha",
         "patch": 0
       }
-    }
+    },
+    "timestamp": "2018-11-22T16:28:46+11:00"
   },
   "software": {
     "base": {
+      "name": "icinga2",
+      "framework": "apache_php",
       "deployment_type": "web",
-      "http_protocol": "https_and_http"
+      "http_protocol": "https_only",
+      "memory": {
+        "required": 128,
+        "recommended": 193
+      }
+    },
+    "system_packages": [
+      {
+        "package": "icinga2"
+      },
+      {
+        "package": "icinga2-classicui"
+      }
+    ],
+    "service_configurations": [
+      {
+        "publisher_namespace": "EnginesSystem",
+        "type_path": "filesystem/local/filesystem",
+        "variables": {
+          "service_name": "etc",
+          "volume_src": "",
+          "engine_path": "/home/fs/etc",
+          "permissions": "rw",
+          "user": "_Engines_Builder(data_uid)",
+          "group": "_Engines_Builder(data_gid)"
+        }
+      }
+    ],
+    "framework_specific": {
+      "apache_httpd_configurations": [
+        {
+          "content": "ScriptAlias /cgi-bin/icinga2-classicui /usr/lib/cgi-bin/icinga2-classicui\r\n\r\n# Where the stylesheets (config files) reside\r\nAlias /icinga2-classicui/stylesheets /etc/icinga2-classicui/stylesheets\r\n\r\n# Where the HTML pages live\r\nAlias /icinga2-classicui /usr/share/icinga2/classicui\r\n\r\n<LocationMatch \"^/cgi-bin/icinga2-classicui\">\r\n    SetEnv ICINGA_CGI_CONFIG /etc/icinga2-classicui/cgi.cfg\r\n</LocationMatch>\r\n\r\n<DirectoryMatch \"^(?:/usr/share/icinga2/classicui/htdocs|/usr/lib/cgi-bin/icinga2-classicui|/etc/icinga2-classicui/stylesheets)/\">\r\n        Options FollowSymLinks\r\n\r\n        DirectoryIndex index.html\r\n\r\n        AllowOverride AuthConfig\r\n\r\n        <IfVersion < 2.3>\r\n                Order Allow,Deny\r\n                Allow From All\r\n        </IfVersion>\r\n\r\n        AuthName \"Icinga Access\"\r\n        AuthType Basic\r\n        AuthUserFile /home/fs/etc/htpasswd.users\r\n        Require valid-user\r\n</DirectoryMatch>\r\n\r\n"
+        }
+      ]
     }
   }
 }
